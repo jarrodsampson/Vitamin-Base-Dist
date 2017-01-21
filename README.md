@@ -1,6 +1,6 @@
 # VitaminBase
 
-AngularJS application styled with SASS/Bootstrap 3, on NodeJS. Designed by [planlodge](http://planlodge.com).
+AngularJS application styled with Bootstrap 3. Designed by [planlodge](http://planlodge.com).
 
 [![Build Status](https://travis-ci.org/stevenbenner/jquery-powertip.svg?branch=master)](https://travis-ci.org/stevenbenner/jquery-powertip)
 ![License](https://img.shields.io/packagist/l/doctrine/orm.svg)
