@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <title>Vitamin App</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <link rel="shortcut icon" type="image/png" href="http://pngimg.com/upload/carrot_PNG4997.png" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+
+</head>
+
+<body id="top" ng-app="VitaminApp" ng-controller="VitaminController" ng-cloak>
+
+<div class="container-fluid col-md-10 col-offset-2">
+
+    <div class="page-header row col-md-12">
+        <div ng-if="showDetails===false">
+            <h1>Vitamin {{detailVitamin.VitaminName}} <small>{{detailVitamin.ChemicalName}}</small> <a data-toggle="tooltip" data-placement="top" title="Return to Vitamin Table" class="btn btn-success pull-right" href="" ng-click="showList();">Back to List</a></h1>
+        </div>
+        <h1 ng-if="showTable===false">Vitamins <small>Vitamin Table</small></h1>
+    </div>
+
+    <div class="row col-md-12" ng-hide="showDetails">
+
+        <div class="col-md-4">
+            <span data-toggle="tooltip" data-placement="top" title="Vitamin {{detailVitamin.VitaminName}}">
+                <img ng-src="{{detailVitamin.Image}}" width="250" class="img-rounded" alt="{{detailVitamin.VitaminName}}" />
+            </span>
+            <h2>Description:</h2>
+            <p>{{detailVitamin.Description}}</p>
+            <h2>Food Sources:</h2>
+            <p>{{detailVitamin.FoodSources}}</p>
+            <h2>Treatments:</h2>
+            <p>{{detailVitamin.UsedFor}}</p>
+            <h2>Recommended Dosage:</h2>
+            <p>{{detailVitamin.Recommended}}{{detailVitamin.Measurement | uppercase}}</p>
+            <h2>Overdose Symptoms:</h2>
+            <p>{{detailVitamin.Overdose}}</p>
+            <h2>Soluable In:</h2>
+            <p>{{detailVitamin.Solubility}}</p>
+        </div>
+
+        <div class="col-md-8">
+
+            <!-- normal tabs with fades -->
+            <div class="row col-md-12">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li ng-if="detailVitamin.Solubility=='Fat'" role="presentation" class="active tabs"><a href="#fatWater" aria-controls="fatWater" role="tab" data-toggle="tab">Fat Soluable</a></li>
+                    <li ng-if="detailVitamin.Solubility=='Water'" role="presentation" class="active tabs"><a href="#fatWater" aria-controls="fatWater" role="tab" data-toggle="tab">Water Soluable</a></li>
+                    <li role="presentation"><a href="#other" aria-controls="other" class="tabs" role="tab" data-toggle="tab">Other Vitamins</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade in active" id="fatWater">
+
+                        <div ng-if="detailVitamin.Solubility=='Fat'">
+
+                            <h5>Other Fat Soluable Vitamins:</h5>
+                            <span class="label label-default" ng-class="{'label-danger': vFilteredFats.length==0}">{{vFilteredFats.length}} Vitamins</span>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <th>Icon</th>
+                                    <th ng-click="sorter('vitaminName')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Vitamin Name">Name</span>
+                                        <span ng-show="sortByItem == 'vitaminName' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'vitaminName' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                    </th>
+                                    <th ng-click="sorter('ChemicalName')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Chemical Name">Chemical Name</span>
+                                        <span ng-show="sortByItem == 'ChemicalName' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'ChemicalName' && sortReverse" class="fa fa-caret-up"></span>
+                                    </th>
+                                    <th ng-click="sorter('Solubility')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Solubility">Solubility</span>
+                                        <span ng-show="sortByItem == 'Solubility' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'Solubility' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                    </th>
+                                    <th ng-click="sorter('Recommended')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Recommended Allowance">Recommended</span>
+                                        <span ng-show="sortByItem == 'Recommended' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'Recommended' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                    </th>
+                                    <th ng-click="sorter('UsedFor')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Usage or Treatment">Usage/Treatment</span>
+                                        <span ng-show="sortByItem == 'UsedFor' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'UsedFor' && sortReverse" class="fa fa-caret-up"></span>
+                                    </th>
+                                    <tr class="item" data-ng-repeat="fats in vFilteredFats = (fatSoluable | orderBy: sortByItem:sortReverse)">
+                                        <td class="clickable" ng-click="detailPage(fats)"><img ng-src="{{fats.Image}}" width="50"/></td>
+                                        <td class="clickable" ng-click="detailPage(fats)">{{fats.VitaminName}}</td>
+                                        <td class="clickable" ng-click="detailPage(fats)">{{fats.ChemicalName}}</td>
+                                        <td>{{fats.Solubility}}</td>
+                                        <td>{{fats.Recommended}} {{fats.Measurement}}</td>
+                                        <td>{{fats.UsedFor}}</td>
+                                    </tr>
+                                    <tr ng-if="vFilteredFats.length==0">
+                                        <td>No Vitamins Found.</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </div>
+
+
+                        <div ng-if="detailVitamin.Solubility=='Water'">
+                            <h5>Other Water Soluable Vitamins:</h5>
+                            <span class="label label-default" ng-class="{'label-danger': vFilteredFats.length==0}">{{vFilteredFats.length}} Vitamins</span>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <th>Icon</th>
+                                    <th ng-click="sorter('vitaminName')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Vitamin Name">Name</span>
+                                        <span ng-show="sortByItem == 'vitaminName' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'vitaminName' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                    </th>
+                                    <th ng-click="sorter('ChemicalName')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Chemical Name">Chemical Name</span>
+                                        <span ng-show="sortByItem == 'ChemicalName' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'ChemicalName' && sortReverse" class="fa fa-caret-up"></span>
+                                    </th>
+                                    <th ng-click="sorter('Solubility')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Solubility">Solubility</span>
+                                        <span ng-show="sortByItem == 'Solubility' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'Solubility' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                    </th>
+                                    <th ng-click="sorter('Recommended')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Recommended Allowance">Recommended</span>
+                                        <span ng-show="sortByItem == 'Recommended' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'Recommended' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                    </th>
+                                    <th ng-click="sorter('UsedFor')">
+                                        <span data-toggle="tooltip" data-placement="top" title="Sort By Usage or Treatment">Usage/Treatment</span>
+                                        <span ng-show="sortByItem == 'UsedFor' && !sortReverse" class="fa fa-caret-down"></span>
+                                        <span ng-show="sortByItem == 'UsedFor' && sortReverse" class="fa fa-caret-up"></span>
+                                    </th>
+                                    <tr class="item" data-ng-repeat="water in vFilteredFats = (waterSoluable | orderBy: sortByItem:sortReverse)">
+                                        <td class="clickable" ng-click="detailPage(water)"><img ng-src="{{water.Image}}" width="50"/></td>
+                                        <td class="clickable" ng-click="detailPage(water)">{{water.VitaminName}}</td>
+                                        <td class="clickable" ng-click="detailPage(water)">{{water.ChemicalName}}</td>
+                                        <td>{{water.Solubility}}</td>
+                                        <td>{{water.Recommended}} {{water.Measurement}}</td>
+                                        <td>{{water.UsedFor}}</td>
+                                    </tr>
+                                    <tr ng-if="vFilteredFats.length==0">
+                                        <td>No Vitamins Found.</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="other">
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <th>Icon</th>
+                                <th ng-click="sorter('vitaminName')">
+                                    <span data-toggle="tooltip" data-placement="top" title="Sort By Vitamin Name">Name</span>
+                                    <span ng-show="sortByItem == 'vitaminName' && !sortReverse" class="fa fa-caret-down"></span>
+                                    <span ng-show="sortByItem == 'vitaminName' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                </th>
+                                <th ng-click="sorter('ChemicalName')">
+                                    <span data-toggle="tooltip" data-placement="top" title="Sort By Chemical Name">Chemical Name</span>
+                                    <span ng-show="sortByItem == 'ChemicalName' && !sortReverse" class="fa fa-caret-down"></span>
+                                    <span ng-show="sortByItem == 'ChemicalName' && sortReverse" class="fa fa-caret-up"></span>
+                                </th>
+                                <th ng-click="sorter('Solubility')">
+                                    <span data-toggle="tooltip" data-placement="top" title="Sort By Solubility">Solubility</span>
+                                    <span ng-show="sortByItem == 'Solubility' && !sortReverse" class="fa fa-caret-down"></span>
+                                    <span ng-show="sortByItem == 'Solubility' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                </th>
+                                <th ng-click="sorter('Recommended')">
+                                    <span data-toggle="tooltip" data-placement="top" title="Sort By Recommended Allowance">Recommended</span>
+                                    <span ng-show="sortByItem == 'Recommended' && !sortReverse" class="fa fa-caret-down"></span>
+                                    <span ng-show="sortByItem == 'Recommended' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                                </th>
+                                <th ng-click="sorter('UsedFor')">
+                                    <span data-toggle="tooltip" data-placement="top" title="Sort By Usage or Treatment">Usage/Treatment</span>
+                                    <span ng-show="sortByItem == 'UsedFor' && !sortReverse" class="fa fa-caret-down"></span>
+                                    <span ng-show="sortByItem == 'UsedFor' && sortReverse" class="fa fa-caret-up"></span>
+                                </th>
+                                <tr class="item" data-ng-repeat="random in vFilteredSamples = (randomSamples | orderBy: sortByItem:sortReverse)">
+                                    <td class="clickable" ng-click="detailPage(random)"><img ng-src="{{random.Image}}" width="50"/></td>
+                                    <td class="clickable" ng-click="detailPage(random)">{{random.VitaminName}}</td>
+                                    <td class="clickable" ng-click="detailPage(random)">{{random.ChemicalName}}</td>
+                                    <td>{{random.Solubility}}</td>
+                                    <td>{{random.Recommended}} {{random.Measurement}}</td>
+                                    <td>{{random.UsedFor}}</td>
+                                </tr>
+                                <tr ng-if="vFilteredSamples.length==0">
+                                    <td>No Vitamins Found.</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+
+    </div>
+
+    <div class="row col-md-12" ng-hide="showTable">
+
+
+        <div class="form-group">
+            <label for="vitaminBox">Search Vitamins: </label>
+            <input type="text" class="form-control" id="vitaminBox" ng-model="vSearch" placeholder="Search.." data-toggle="tooltip" data-placement="top" title="Search Vitamins">
+        </div>
+
+        <div class="col-md-12">
+
+            <div class="form-group col-md-2">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="fatCheck" ng-click="solubility('Fat')"> Fat Soluable
+                    </label>
+                </div>
+            </div>
+
+
+            <div class="form-group col-md-2">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="waterCheck" ng-click="solubility('Water')"> Water Soluable
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group col-md-2">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox"> Check me out
+                    </label>
+                </div>
+            </div>
+
+        </div>
+
+        <span class="label label-default" ng-class="{'label-danger': vFiltered.length==0}">{{vFiltered.length}} Vitamins</span>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <th>Icon</th>
+                <th ng-click="sorter('vitaminName')">
+                    <span data-toggle="tooltip" data-placement="top" title="Sort By Vitamin Name">Name</span>
+                    <span ng-show="sortByItem == 'vitaminName' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortByItem == 'vitaminName' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                </th>
+                <th ng-click="sorter('ChemicalName')">
+                    <span data-toggle="tooltip" data-placement="top" title="Sort By Chemical Name">Chemical Name</span>
+                    <span ng-show="sortByItem == 'ChemicalName' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortByItem == 'ChemicalName' && sortReverse" class="fa fa-caret-up"></span>
+                </th>
+                <th ng-click="sorter('Solubility')">
+                    <span data-toggle="tooltip" data-placement="top" title="Sort By Solubility">Solubility</span>
+                    <span ng-show="sortByItem == 'Solubility' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortByItem == 'Solubility' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                </th>
+                <th ng-click="sorter('Recommended')">
+                    <span data-toggle="tooltip" data-placement="top" title="Sort By Recommended Allowance">Recommended</span>
+                    <span ng-show="sortByItem == 'Recommended' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortByItem == 'Recommended' && sortReverse" class="fa fa-caret-up"></span>&nbsp;
+                </th>
+                <th ng-click="sorter('UsedFor')">
+                    <span data-toggle="tooltip" data-placement="top" title="Sort By Usage or Treatment">Usage/Treatment</span>
+                    <span ng-show="sortByItem == 'UsedFor' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortByItem == 'UsedFor' && sortReverse" class="fa fa-caret-up"></span>
+                </th>
+                <tr class="item" data-ng-repeat="vitamin in vFiltered = (vitamins | filter: vSearch | orderBy: sortByItem:sortReverse)">
+                    <td class="clickable" ng-click="detailPage(vitamin)"><img ng-src="{{vitamin.Image}}" width="50"/></td>
+                    <td class="clickable" ng-click="detailPage(vitamin)">{{vitamin.VitaminName}}</td>
+                    <td class="clickable" ng-click="detailPage(vitamin)">{{vitamin.ChemicalName}}</td>
+                    <td>{{vitamin.Solubility}}</td>
+                    <td>{{vitamin.Recommended}} {{vitamin.Measurement}}</td>
+                    <td>{{vitamin.UsedFor}}</td>
+                </tr>
+                <tr ng-if="vFiltered.length==0">
+                    <td>No Vitamins Found.</td>
+                </tr>
+            </table>
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<footer class="footer col-md-12">
+    <div class="container">
+        <h3>Vitamin App &copy; 2016</h3>
+    </div>
+</footer>
+
+
+
+<!-- scroll to top -->
+<div class="scroll-up" data-toggle="tooltip" class="has-tip left" title="Back to Top">
+    <a href="#top"><i class="fa fa-arrow-up"></i></a>
+</div>
+
+
+<div id="loader" ng-hide="notLoading">
+    <div class="overlay"></div>
+    <div id="page">
+        <div id="phrase_box">
+            <svg width="100%" height="100%">
+                <defs>
+                    <!--<style type="text/css">
+                      @font-face {
+                        font-family: "Proxima";
+                        src: url('');
+                      }
+                    </style>-->
+                    <mask id="mask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">
+                        <linearGradient id="linearGradient" gradientUnits="objectBoundingBox" x2="0" y2="1">
+                            <stop stop-color="white" stop-opacity="0" offset="0%"/>
+                            <stop stop-color="white" stop-opacity="1" offset="30%"/>
+                            <stop stop-color="white" stop-opacity="1" offset="70%"/>
+                            <stop stop-color="white" stop-opacity="0" offset="100%"/>
+                        </linearGradient>
+                        <rect width="100%" height="100%" fill="url(#linearGradient)"/>
+                    </mask>
+                </defs>
+                <g width="100%" height="100%" style="mask: url(#mask);">
+                    <g id="phrases"></g>
+                </g>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<div id="loader2">
+    <div class='ajax-spinner-bars'>
+        <div class='bar-1'></div>
+        <div class='bar-2'></div>
+        <div class='bar-3'></div>
+        <div class='bar-4'></div>
+        <div class='bar-5'></div>
+        <div class='bar-6'></div>
+        <div class='bar-7'></div>
+        <div class='bar-8'></div>
+        <div class='bar-9'></div>
+        <div class='bar-10'></div>
+        <div class='bar-11'></div>
+        <div class='bar-12'></div>
+        <div class='bar-13'></div>
+        <div class='bar-14'></div>
+        <div class='bar-15'></div>
+        <div class='bar-16'></div>
+    </div>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.8/angular-animate.min.js"></script>
+<script src="
+https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+
+    // javascript
+    var checkmarkIdPrefix = "loadingCheckSVG-";
+    var checkmarkCircleIdPrefix = "loadingCheckCircleSVG-";
+    var verticalSpacing = 50;
+
+    function shuffleArray(array) {
+        for (var i = array.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+        return array;
+    }
+
+    function createSVG(tag, properties, opt_children) {
+        var newElement = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        for(prop in properties) {
+            newElement.setAttribute(prop, properties[prop]);
+        }
+        if (opt_children) {
+            opt_children.forEach(function(child) {
+                newElement.appendChild(child);
+            })
+        }
+        return newElement;
+    }
+
+    function createPhraseSvg(phrase, yOffset) {
+        var text = createSVG("text", {
+            fill: "white",
+            x: 50,
+            y: yOffset,
+            "font-size": 18,
+            "font-family": "Arial"
+        });
+        text.appendChild(document.createTextNode(phrase + "..."));
+        return text;
+    }
+    function createCheckSvg(yOffset, index) {
+        var check = createSVG("polygon", {
+            points: "21.661,7.643 13.396,19.328 9.429,15.361 7.075,17.714 13.745,24.384 24.345,9.708 ",
+            fill: "rgba(255,255,255,1)",
+            id: checkmarkIdPrefix + index
+        });
+        var circle_outline = createSVG("path", {
+            d: "M16,0C7.163,0,0,7.163,0,16s7.163,16,16,16s16-7.163,16-16S24.837,0,16,0z M16,30C8.28,30,2,23.72,2,16C2,8.28,8.28,2,16,2 c7.72,0,14,6.28,14,14C30,23.72,23.72,30,16,30z",
+            fill: "white"
+        })
+        var circle = createSVG("circle", {
+            id: checkmarkCircleIdPrefix + index,
+            fill: "rgba(255,255,255,0)",
+            cx: 16,
+            cy: 16,
+            r: 15
+        })
+        var group = createSVG("g", {
+            transform: "translate(10 " + (yOffset - 20) + ") scale(.9)"
+        }, [circle, check, circle_outline]);
+        return group;
+    }
+
+    function addPhrasesToDocument(phrases) {
+        phrases.forEach(function(phrase, index) {
+            var yOffset = 30 + verticalSpacing * index;
+            document.getElementById("phrases").appendChild(createPhraseSvg(phrase, yOffset));
+            document.getElementById("phrases").appendChild(createCheckSvg(yOffset, index));
+        });
+    }
+
+    function easeInOut(t) {
+        var period = 200;
+        return (Math.sin(t / period + 100) + 1) /2;
+    }
+
+    document.addEventListener("DOMContentLoaded", function(event) {
+        var phrases = shuffleArray([
+            "Gathering Vitamins",
+            "Sorting Vitamins",
+            "Collecting Results",
+            "Adding Vitamin UI",
+            "Copying Dosages",
+            "Writing Descriptions"]);
+        addPhrasesToDocument(phrases);
+        var start_time = new Date().getTime();
+        var upward_moving_group = document.getElementById("phrases");
+        upward_moving_group.currentY = 0;
+        var checks = phrases.map(function(_, i) {
+            return {check: document.getElementById(checkmarkIdPrefix + i), circle: document.getElementById(checkmarkCircleIdPrefix + i)};
+        });
+        function animateLoading() {
+            var now = new Date().getTime();
+            upward_moving_group.setAttribute("transform", "translate(0 " + upward_moving_group.currentY + ")");
+            upward_moving_group.currentY -= 1.35 * easeInOut(now);
+            checks.forEach(function(check, i) {
+                var color_change_boundary = - i * verticalSpacing + verticalSpacing + 15;
+                if (upward_moving_group.currentY < color_change_boundary) {
+                    var alpha = Math.max(Math.min(1 - (upward_moving_group.currentY - color_change_boundary + 15)/30, 1), 0);
+                    check.circle.setAttribute("fill", "rgba(255, 255, 255, " + alpha + ")");
+                    var check_color = [Math.round(255 * (1-alpha) + 120 * alpha), Math.round(255 * (1-alpha) + 154 * alpha)];
+                    check.check.setAttribute("fill", "rgba(255, " + check_color[0] + "," + check_color[1] + ", 1)");
+                }
+            })
+            if (now - start_time < 30000 && upward_moving_group.currentY > -710) {
+                requestAnimationFrame(animateLoading);
+            }
+        }
+        animateLoading();
+    });
+
+</script>
+
+</body>
+
+</html>
